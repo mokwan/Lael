@@ -1,0 +1,43 @@
+Section 5
+Cron daemon
+
+#Run the following command to verify that cron is running:
+systemctl status cron | grep 'Active: active (running)'
+
+# Ensure permissions on /etc/crontab are configured 
+#Run the following command and verify Uid and Gid are both 0/root and Access does not grant permissions to group or other
+stat /etc/crontab
+
+#Ensure permissions on /etc/cron.hourly,daily,weekly and monthly are configured
+stat /etc/cron.hourly/
+stat /etc/cron.daily/
+stat /etc/cron.weekly/
+stat /etc/cron.monthly/
+
+# Ensure permissions on /etc/cron.d are configured
+stat /etc/cron.d/
+
+#Ensure cron is restricted to authorized users
+stat /etc/cron.deny
+rm /etc/cron.deny #if it exists 
+
+
+#create a cron.allow file and set the permissions to root access
+touch /etc/cron.allow
+chmod g-wx,o-rwx /etc/cron.allow
+chown root:root /etc/cron.allow
+stat /etc/cron.allow
+
+#Ensure at is restricted to authorized users (Automated)
+touch /etc/at.allow
+chmod g-wx,o-rwx /etc/at.allow
+chown root:root /etc/at.allow
+stat /etc/at.allow
+
+#Ensure permissions on /etc/ssh/sshd_config are configured
+stat /etc/ssh/sshd_config
+
+sudo sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) /etc/hosts | awk '{print $1}')" | grep -Pi '^\h*(allow|deny)(users|groups)\h+\H+(\h+.*)?$'
+
+grep -rPi '^\h*(allow|deny)(users|groups)\h+\H+(\h+.*)?$' /etc/ssh/sshd_config*
+
